@@ -1,0 +1,53 @@
+-Overview:
+The get_ip() function extracts the client's IP address from an incoming HTTP request in a Django 
+application. This can be useful for logging, tracking, or implementing access control mechanisms 
+such as whitelisting or blacklisting.
+
+
+-Usage:
+
+from django.utils.get_ip import get_ip
+
+ip_address = get_ip(request)
+
+The function returns the IP address of the client making the request. It first checks for any forwarded
+IP addresses provided by proxies in the HTTP_X_FORWARDED_FOR header. If no such header is present, 
+it defaults to the IP address found in REMOTE_ADDR.
+
+
+-Parameters:
+request: The Django HttpRequest object from which the client's IP address will be extracted.
+
+-Return Value:
+String: The client's IP address as a string. If no IP address can be determined, the function returns None.
+
+-How It Works:
+The function first checks the request’s META dictionary for the HTTP_X_FORWARDED_FOR key, which is used
+when the client is behind a proxy. This header can contain a comma-separated list of IP addresses, with 
+the client’s actual IP being the first in the list.
+
+If the HTTP_X_FORWARDED_FOR header is not present, the function falls back to the REMOTE_ADDR key in 
+the META dictionary, which provides the IP address directly from the request.
+
+-Example:
+
+from django.http import HttpResponse
+from django.utils.get_ip import get_ip
+
+
+def my_view(request):
+    client_ip = get_ip(request)
+    return HttpResponse(f"Your IP address is {client_ip}")
+
+-Common Use Cases:
+    *Logging: Track users' IP addresses for monitoring or analytics.
+    * Security: Implement  IP-based access control (whitelisting/blacklisting) by comparing the 
+    extracted IP with a list of authorized or blocked IP addresses.
+
+-Example of get_ip() for access control:
+
+WHITELISTED_IPS = ['012.34.56.78']
+def restricted_view(request):
+    if get_ip(request) not in WHITELISTED_IPS:
+        return HttpResponseForbidden("Access Denied")
+    return HttpResponse("Welcome!")
